@@ -16,7 +16,7 @@ class HotKey
 end
 
 def retreiveCouchbaseStats(ip,bucket,zoom)
-  url = "http://" + ip + ":8091/pools/default/buckets/" + NAME_OF_BUCKET + "/stats"
+  url = "http://" + ip + ":8091/pools/default/buckets/" + bucket + "/stats"
   uri = URI.parse(url)
   params = {:zoom => zoom.to_s}
   uri.query = URI.encode_www_form(params)
@@ -49,12 +49,17 @@ opt_parser = OptionParser.new do |opt|
   opt.separator  "Commands"
   opt.separator  "     ip: Ip of one of the nodes in your cluster"
   opt.separator  "     zoom: Time scope"
+  opt.separator  "     bucket: Name of the bucket"
   opt.separator  "     stats: Include doc/view fragmentation, disk write queue and other key stats"
   opt.separator  ""
   opt.separator  "Options"
 
   opt.on("-u","--ip IP",String,"Node IP") do |ip|
     options[:ip] = ip
+  end
+
+  opt.on("-b","--bucket BUCKET",String,"Bucket name") do |bucket|
+    options[:bucket] = bucket
   end
 
   opt.on("-z","--zoom ZOOM",String,"Options {minute|hour|day|week|month|year|}") do |zoom|
@@ -76,14 +81,19 @@ opt_parser.parse!
 
 ip = options[:ip]
 zoom = options[:zoom]
+bucket = options[:bucket]
 additional_stats = options[:stats]
 
-if ip.nil? or zoom.nil?
+puts ip
+puts zoom
+puts bucket
+
+if ip.nil? or zoom.nil? or bucket.nil?
 puts opt_parser
 raise abort
 end
 
-json_response = retreiveCouchbaseStats(ip,zoom)
+json_response = retreiveCouchbaseStats(ip,bucket,zoom)
 generateHotKeys(json_response)
 
 if additional_stats
