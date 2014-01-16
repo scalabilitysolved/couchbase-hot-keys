@@ -47,23 +47,21 @@ opt_parser = OptionParser.new do |opt|
   opt.separator  ""
   opt.separator  "Commands"
   opt.separator  "     url: Url of one of your cluster nodes"
-  opt.separator  "     zoom: Time scopre {minute|hour|day|week|month|year|}"
-  opt.separator  "     additionalStats: include top key stats"
+  opt.separator  "     zoom: Time scope"
+  opt.separator  "     stats: Include doc/view fragmentation, disk write queue and other key stats"
   opt.separator  ""
   opt.separator  "Options"
 
-  opt.on("-u","--url URL",String,"Which node to target") do |url|
+  opt.on("-u","--url URL",String,"Node Url") do |url|
     options[:url] = url
   end
 
-  opt.on("-z","--zoom ZOOM",String,"When to target") do |zoom|
+  opt.on("-z","--zoom ZOOM",String,"Options {minute|hour|day|week|month|year|}") do |zoom|
     options[:zoom] = zoom
   end
 
-
-
-  opt.on("-s","--stats",TrueClass,"additional stats") do |additional_stats|
-  	options[:additional_stats] = additional_stats
+  opt.on("-s","--stats",TrueClass,"add flag for additional stats") do |stats|
+  	options[:stats] = stats
   end
 
   opt.on("-h","--help","help") do
@@ -73,26 +71,20 @@ end
 
 opt_parser.parse!
 
-case ARGV[0]
-when "u"
-  puts "call start on options #{options.inspect}"
-when "z"
-  puts "call stop on options #{options.inspect}"
-when "s"
-  puts "call restart on options #{options.inspect}"
-else
-  puts opt_parser
-  raise abort
-end
 
 
 url = options[:url]
 zoom = options[:zoom]
-additional_stats = options[:additional_stats]
-puts url
-puts zoom
-puts additional_stats
+additional_stats = options[:stats]
+
+if url.nil? or zoom.nil?
+puts opt_parser
+raise abort
+end
 
 json_response = retreiveCouchbaseStats(url,zoom)
 generateHotKeys(json_response)
+
+if additional_stats
 generateAdditionalStats(json_response)
+end
