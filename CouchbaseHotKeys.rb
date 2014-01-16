@@ -15,7 +15,8 @@ class HotKey
   end
 end
 
-def retreiveCouchbaseStats(url,zoom)
+def retreiveCouchbaseStats(ip,bucket,zoom)
+  url = "http://" + ip + ":8091/pools/default/buckets/" + NAME_OF_BUCKET + "/stats"
   uri = URI.parse(url)
   params = {:zoom => zoom.to_s}
   uri.query = URI.encode_www_form(params)
@@ -46,14 +47,14 @@ opt_parser = OptionParser.new do |opt|
   opt.banner = "Usage: Couchbase Hot Keys COMMAND [OPTIONS]"
   opt.separator  ""
   opt.separator  "Commands"
-  opt.separator  "     url: Url of one of your cluster nodes"
+  opt.separator  "     ip: Ip of one of the nodes in your cluster"
   opt.separator  "     zoom: Time scope"
   opt.separator  "     stats: Include doc/view fragmentation, disk write queue and other key stats"
   opt.separator  ""
   opt.separator  "Options"
 
-  opt.on("-u","--url URL",String,"Node Url") do |url|
-    options[:url] = url
+  opt.on("-u","--ip IP",String,"Node IP") do |ip|
+    options[:ip] = ip
   end
 
   opt.on("-z","--zoom ZOOM",String,"Options {minute|hour|day|week|month|year|}") do |zoom|
@@ -73,16 +74,16 @@ opt_parser.parse!
 
 
 
-url = options[:url]
+ip = options[:ip]
 zoom = options[:zoom]
 additional_stats = options[:stats]
 
-if url.nil? or zoom.nil?
+if ip.nil? or zoom.nil?
 puts opt_parser
 raise abort
 end
 
-json_response = retreiveCouchbaseStats(url,zoom)
+json_response = retreiveCouchbaseStats(ip,zoom)
 generateHotKeys(json_response)
 
 if additional_stats
