@@ -47,7 +47,7 @@ opt_parser = OptionParser.new do |opt|
   opt.banner = "Usage: Couchbase Hot Keys COMMAND [OPTIONS]"
   opt.separator  ""
   opt.separator  "Commands"
-  opt.separator  "     ip: Ip of one of the nodes in your cluster"
+  opt.separator  "     ip: Ip of one of the nodes in your cluster, format : {127.0.0.1}"
   opt.separator  "     zoom: Time scope"
   opt.separator  "     bucket: Name of the bucket"
   opt.separator  "     stats: Include doc/view fragmentation, disk write queue and other key stats"
@@ -70,25 +70,20 @@ opt_parser = OptionParser.new do |opt|
   	options[:stats] = stats
   end
 
-  opt.on("-h","--help","help") do
-    puts opt_parser
+  opt.on("-h","--help",TrueClass,"help") do |help|
+    options[:help] = help
   end
 end
 
 opt_parser.parse!
 
-
-
 ip = options[:ip]
 zoom = options[:zoom]
 bucket = options[:bucket]
 additional_stats = options[:stats]
+help = options[:help]
 
-puts ip
-puts zoom
-puts bucket
-
-if ip.nil? or zoom.nil? or bucket.nil?
+if ip.nil? or zoom.nil? or bucket.nil? or help
 puts opt_parser
 raise abort
 end
